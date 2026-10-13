@@ -1,27 +1,34 @@
-import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { Assignment, AssignmentFilter, AsyncStatus, CreateAssignmentDto } from '../../types'
+import { createAsyncThunk, createSlice, nanoid, type PayloadAction } from '@reduxjs/toolkit'
+import type { Assignment, AssignmentFilter, AsyncStatus, CreateAssignmentDto } from '@/types'
 import { fetchAssignmentsApi } from './assignmentsApi'
+import { generateAssignments } from './stressData'
 
-interface AssignmentsState {
+export interface AssignmentsState {
   items: Assignment[]
   status: AsyncStatus
   error: string | null
   filter: AssignmentFilter
 }
 
-const initialState: AssignmentsState = {
+export const initialState: AssignmentsState = {
   items: [],
   status: 'idle',
   error: null,
   filter: 'all',
 }
 
-/** createAsyncThunk<ReturnType, ArgType> — slide Buổi 3. */
-export const fetchAssignments = createAsyncThunk<Assignment[], void>(
+/**
+ * createAsyncThunk<ReturnType, ArgType, ThunkApiConfig> — slide Buổi 3.
+ * condition: StrictMode chạy effect hai lần lúc mount; lần gọi thứ hai bị huỷ khi đang tải.
+ */
+export const fetchAssignments = createAsyncThunk<Assignment[], void, { state: { assignments: AssignmentsState } }>(
   'assignments/fetchAll',
   async () => {
     const response = await fetchAssignmentsApi()
     return response.data.items
+  },
+  {
+    condition: (_, { getState }) => getState().assignments.status !== 'loading',
   },
 )
 
@@ -29,13 +36,14 @@ const assignmentsSlice = createSlice({
   name: 'assignments',
   initialState,
   reducers: {
-    addAssignment(state, action: PayloadAction<CreateAssignmentDto>) {
-      const next: Assignment = {
-        ...action.payload,
-        id: crypto.randomUUID(),
-        completed: false,
-      }
-      state.items.unshift(next)
+    addAssignment: {
+      reducer(state, action: PayloadAction<Assignment>) {
+        state.items.unshift(action.payload)
+      },
+      // Sinh id ở prepare để reducer vẫn là hàm thuần.
+      prepare(dto: CreateAssignmentDto) {
+        return { payload: { ...dto, id: nanoid(), completed: false } }
+      },
     },
     toggleComplete(state, action: PayloadAction<string>) {
       const found = state.items.find((item) => item.id === action.payload)
@@ -44,10 +52,24 @@ const assignmentsSlice = createSlice({
       }
     },
     removeAssignment(state, action: PayloadAction<string>) {
-      state.items = state.items.filter((item) => item.id !== action.payload)
+      const index = state.items.findIndex((item) => item.id === action.payload)
+      if (index !== -1) {
+        state.items.splice(index, 1)
+      }
     },
     setFilter(state, action: PayloadAction<AssignmentFilter>) {
       state.filter = action.payload
+    },
+    /** Stress test: thay toàn bộ danh sách bằng `count` bài sinh sẵn. */
+    seedAssignments: {
+      reducer(state, action: PayloadAction<Assignment[]>) {
+        state.items = action.payload
+        state.status = 'succeeded'
+        state.error = null
+      },
+      prepare(count: number) {
+        return { payload: generateAssignments(count) }
+      },
     },
   },
   extraReducers: (builder) => {
@@ -62,10 +84,10 @@ const assignmentsSlice = createSlice({
       })
       .addCase(fetchAssignments.rejected, (state, action) => {
         state.status = 'failed'
-        state.error = action.error.message ?? 'Không tải được danh sách bài tập'
+        state.error = action.error.message ?? 'Không tải được danh sách bài tập.'
       })
   },
 })
 
-export const { addAssignment, toggleComplete, removeAssignment, setFilter } = assignmentsSlice.actions
+export const { addAssignment, toggleComplete, removeAssignment, setFilter, seedAssignments } = assignmentsSlice.actions
 export default assignmentsSlice.reducer

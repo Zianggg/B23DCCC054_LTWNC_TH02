@@ -1,7 +1,11 @@
-import { useState, type FormEvent } from 'react'
-import { useAppDispatch } from '../../app/hooks'
-import { useForm } from '../../shared/hooks/useForm'
-import { PRIORITY_LABELS, isPriority, type CreateAssignmentDto, type Priority } from '../../types'
+import { useId, useState, type FormEvent } from 'react'
+import { useAppDispatch } from '@/app/hooks'
+import { Button } from '@/components/ui/button'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import { useForm } from '@/shared/hooks/useForm'
+import { PRIORITY_LABELS, isPriority, type CreateAssignmentDto, type Priority } from '@/types'
 import { addAssignment } from './assignmentsSlice'
 
 const INITIAL_FORM: CreateAssignmentDto = {
@@ -11,7 +15,17 @@ const INITIAL_FORM: CreateAssignmentDto = {
   priority: 'medium',
 }
 
+const PRIORITIES = Object.keys(PRIORITY_LABELS) as Priority[]
+
 type FormErrors = Partial<Record<keyof CreateAssignmentDto, string>>
+
+export function validateAssignment(values: CreateAssignmentDto): FormErrors {
+  const errors: FormErrors = {}
+  if (!values.course.trim()) errors.course = 'Nhập tên môn học.'
+  if (!values.title.trim()) errors.title = 'Nhập tên bài tập.'
+  if (!values.dueDate) errors.dueDate = 'Chọn hạn nộp.'
+  return errors
+}
 
 interface AssignmentFormProps {
   onSuccess?: () => void
@@ -22,19 +36,14 @@ export function AssignmentForm({ onSuccess, onCancel }: AssignmentFormProps) {
   const dispatch = useAppDispatch()
   const { values, setField, reset } = useForm<CreateAssignmentDto>(INITIAL_FORM)
   const [errors, setErrors] = useState<FormErrors>({})
-
-  const validate = (): boolean => {
-    const next: FormErrors = {}
-    if (!values.course.trim()) next.course = 'Nhập tên môn học.'
-    if (!values.title.trim()) next.title = 'Nhập tên bài tập.'
-    if (!values.dueDate) next.dueDate = 'Chọn hạn nộp.'
-    setErrors(next)
-    return Object.keys(next).length === 0
-  }
+  const id = useId()
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!validate()) return
+    const nextErrors = validateAssignment(values)
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length > 0) return
+
     dispatch(
       addAssignment({
         course: values.course.trim(),
@@ -44,85 +53,83 @@ export function AssignmentForm({ onSuccess, onCancel }: AssignmentFormProps) {
       }),
     )
     reset()
-    setErrors({})
     onSuccess?.()
   }
 
   return (
-    <form className="form" onSubmit={handleSubmit} noValidate>
-      <header className="form__head">
-        <h2 id="add-form-title">Thêm bài tập</h2>
-        <p>Bài tập mới sẽ nằm ở đầu danh sách và được tính vào thống kê.</p>
-      </header>
-
-      <label className="field">
-        <span className="field__label">Môn học</span>
-        <input
-          type="text"
-          name="course"
-          placeholder="Lập trình web nâng cao"
-          aria-invalid={Boolean(errors.course)}
-          value={values.course}
-          onChange={(e) => setField('course', e.target.value)}
-        />
-        {errors.course ? <small className="field__error">{errors.course}</small> : null}
-      </label>
-
-      <label className="field">
-        <span className="field__label">Tên bài tập</span>
-        <input
-          type="text"
-          name="title"
-          placeholder="Bài thực hành 01"
-          aria-invalid={Boolean(errors.title)}
-          value={values.title}
-          onChange={(e) => setField('title', e.target.value)}
-        />
-        {errors.title ? <small className="field__error">{errors.title}</small> : null}
-      </label>
-
-      <div className="form__row">
-        <label className="field">
-          <span className="field__label">Hạn nộp</span>
-          <input
-            type="date"
-            name="dueDate"
-            aria-invalid={Boolean(errors.dueDate)}
-            value={values.dueDate}
-            onChange={(e) => setField('dueDate', e.target.value)}
+    <form onSubmit={handleSubmit} noValidate aria-label="Thêm bài tập" className="flex flex-col gap-6">
+      <FieldGroup className="gap-4">
+        <Field data-invalid={Boolean(errors.course)}>
+          <FieldLabel htmlFor={`${id}-course`}>Môn học</FieldLabel>
+          <Input
+            id={`${id}-course`}
+            name="course"
+            placeholder="Lập trình web nâng cao"
+            aria-invalid={Boolean(errors.course)}
+            aria-describedby={errors.course ? `${id}-course-error` : undefined}
+            value={values.course}
+            onChange={(event) => setField('course', event.target.value)}
           />
-          {errors.dueDate ? <small className="field__error">{errors.dueDate}</small> : null}
-        </label>
+          <FieldError id={`${id}-course-error`}>{errors.course}</FieldError>
+        </Field>
 
-        <label className="field">
-          <span className="field__label">Mức ưu tiên</span>
-          <select
-            name="priority"
-            value={values.priority}
-            onChange={(e) => {
-              if (isPriority(e.target.value)) {
-                setField('priority', e.target.value as Priority)
-              }
-            }}
-          >
-            {(Object.keys(PRIORITY_LABELS) as Priority[]).map((key) => (
-              <option key={key} value={key}>
-                {PRIORITY_LABELS[key]}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+        <Field data-invalid={Boolean(errors.title)}>
+          <FieldLabel htmlFor={`${id}-title`}>Tên bài tập</FieldLabel>
+          <Input
+            id={`${id}-title`}
+            name="title"
+            placeholder="Bài thực hành 02"
+            aria-invalid={Boolean(errors.title)}
+            aria-describedby={errors.title ? `${id}-title-error` : undefined}
+            value={values.title}
+            onChange={(event) => setField('title', event.target.value)}
+          />
+          <FieldError id={`${id}-title-error`}>{errors.title}</FieldError>
+        </Field>
 
-      <div className="form__actions">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field data-invalid={Boolean(errors.dueDate)}>
+            <FieldLabel htmlFor={`${id}-due`}>Hạn nộp</FieldLabel>
+            <Input
+              id={`${id}-due`}
+              name="dueDate"
+              type="date"
+              aria-invalid={Boolean(errors.dueDate)}
+              aria-describedby={errors.dueDate ? `${id}-due-error` : undefined}
+              value={values.dueDate}
+              onChange={(event) => setField('dueDate', event.target.value)}
+            />
+            <FieldError id={`${id}-due-error`}>{errors.dueDate}</FieldError>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor={`${id}-priority`}>Mức ưu tiên</FieldLabel>
+            <NativeSelect
+              id={`${id}-priority`}
+              name="priority"
+              className="w-full"
+              value={values.priority}
+              onChange={(event) => {
+                if (isPriority(event.target.value)) setField('priority', event.target.value)
+              }}
+            >
+              {PRIORITIES.map((key) => (
+                <NativeSelectOption key={key} value={key}>
+                  {PRIORITY_LABELS[key]}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+          </Field>
+        </div>
+      </FieldGroup>
+
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         {onCancel ? (
-          <button type="button" className="btn btn--quiet" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={onCancel}>
             Hủy
-          </button>
+          </Button>
         ) : null}
-        <button type="submit" className="btn btn--primary">
-          Thêm bài tập
-        </button>
+        <Button type="submit">Thêm bài tập</Button>
       </div>
     </form>
   )

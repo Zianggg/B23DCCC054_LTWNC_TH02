@@ -1,0 +1,23 @@
+action assignments/fetchAll/pending @ 14:26:26.978 (in 0.40 ms)
+  prev state {"assignments":{"items":"[0 bài]","status":"idle","error":null,"filter":"all"}}
+  action    {"type":"assignments/fetchAll/pending","meta":{"requestId":"9b62Xh5C-M9CwonBdHR3_","requestStatus":"pending"}}
+  next state {"assignments":{"items":"[0 bài]","status":"loading","error":null,"filter":"all"}}
+action assignments/fetchAll/fulfilled @ 14:26:27.635 (in 0.30 ms)
+  prev state {"assignments":{"items":"[0 bài]","status":"loading","error":null,"filter":"all"}}
+  action    {"type":"assignments/fetchAll/fulfilled","payload":[{"id":"asg-01","course":"Lập trình web nâng cao","title":"Bài thực hành 02: nâng cấp Student Deadline Tracker","dueDate":"2026-10-17","priority":"high","completed":false},{"id":"asg-02","course":"Cơ sở dữ liệu","title":"Báo cáo nhóm: thiết kế lược đồ quan hệ","dueDate":"2026-10-11","priority":"high","completed":false},{"id":"asg-03","course":"Mạng máy tính","title":"Bài lab 03: định tuyến tĩnh","dueDate":"2026-10-14","priority":"medium","completed":false},{"id":"asg-04","course":"Toán rời rạc","title":"Bài tập chương 4: quan hệ và hàm","dueDate":"2026-10-07","priority":"low","completed":true},{"id":"asg-05","course":"Lập trình web nâng cao","title":"Ôn tập: Zustand, Context và Redux middleware","dueDate":"2026-10-22","priority":"medium","completed":false},{"id":"asg-06","course":"Tiếng Anh chuyên ngành","title":"Bài luận 400 từ: đạo văn học thuật","dueDate":"2026-10-12","priority":"low","completed":false}],"meta":{"requestId":"9b62Xh5C-M9CwonBdHR3_","requestStatus":"fulfilled"}}
+  next state {"assignments":{"items":"[6 bài]","status":"succeeded","error":null,"filter":"all"}}
+--- (thêm bài) ---
+action assignments/addAssignment @ 14:26:28.662 (in 0.80 ms)
+  prev state {"assignments":{"items":"[6 bài]","status":"succeeded","error":null,"filter":"all"}}
+  action    {"type":"assignments/addAssignment","payload":{"course":"Hệ điều hành","title":"Bài tập lập lịch CPU","dueDate":"2026-10-20","priority":"medium","id":"Yb5jgLFtdCp7eWDrRxw_e","completed":false}}
+  next state {"assignments":{"items":"[7 bài]","status":"succeeded","error":null,"filter":"all"}}
+--- (hoàn thành bài) ---
+action assignments/toggleComplete @ 14:26:29.310 (in 0.20 ms)
+  prev state {"assignments":{"items":"[7 bài]","status":"succeeded","error":null,"filter":"all"}}
+  action    {"type":"assignments/toggleComplete","payload":"Yb5jgLFtdCp7eWDrRxw_e"}
+  next state {"assignments":{"items":"[7 bài]","status":"succeeded","error":null,"filter":"all"}}
+--- (xoá bài) ---
+action assignments/removeAssignment @ 14:26:29.954 (in 0.50 ms)
+  prev state {"assignments":{"items":"[7 bài]","status":"succeeded","error":null,"filter":"all"}}
+  action    {"type":"assignments/removeAssignment","payload":"Yb5jgLFtdCp7eWDrRxw_e"}
+  next state {"assignments":{"items":"[6 bài]","status":"succeeded","error":null,"filter":"all"}}

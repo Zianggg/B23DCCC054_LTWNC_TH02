@@ -1,0 +1,128 @@
+{
+  "before": {
+    "runs": [
+      {
+        "run": 1,
+        "score": 37,
+        "fcp": 2710,
+        "lcp": 5673,
+        "tbt": 11536,
+        "cls": 0.01870281822430243,
+        "si": 8935,
+        "tti": 14652,
+        "domSize": 314754,
+        "mainThread": 28297,
+        "bootup": 5168,
+        "bytes": 321143
+      },
+      {
+        "run": 2,
+        "score": 40,
+        "fcp": 2706,
+        "lcp": 5036,
+        "tbt": 9106,
+        "cls": 0.01870281822430243,
+        "si": 7488,
+        "tti": 12211,
+        "domSize": 314754,
+        "mainThread": 23523,
+        "bootup": 4987,
+        "bytes": 321143
+      },
+      {
+        "run": 3,
+        "score": 41,
+        "fcp": 2706,
+        "lcp": 4893,
+        "tbt": 8631,
+        "cls": 0.01870281822430243,
+        "si": 7187,
+        "tti": 11694,
+        "domSize": 314754,
+        "mainThread": 22529,
+        "bootup": 4645,
+        "bytes": 321143
+      }
+    ],
+    "medianRunByTbt": "before-2.report.json",
+    "median": {
+      "score": 40,
+      "fcp": 2706.0089000000003,
+      "lcp": 5035.924475,
+      "tbt": 9106.050350000001,
+      "cls": 0.01870281822430243,
+      "si": 7488.287464543803,
+      "tti": 12210.649650000001,
+      "domSize": 314754,
+      "mainThread": 23522.920000000136,
+      "bootup": 4986.571999999904,
+      "bytes": 321143
+    }
+  },
+  "after": {
+    "runs": [
+      {
+        "run": 1,
+        "score": 89,
+        "fcp": 2717,
+        "lcp": 2966,
+        "tbt": 135,
+        "cls": 0.01870281822430243,
+        "si": 2717,
+        "tti": 3105,
+        "domSize": 499,
+        "mainThread": 885,
+        "bootup": 327,
+        "bytes": 322355
+      },
+      {
+        "run": 2,
+        "score": 89,
+        "fcp": 2858,
+        "lcp": 2946,
+        "tbt": 103,
+        "cls": 0.01870281822430243,
+        "si": 2858,
+        "tti": 3063,
+        "domSize": 499,
+        "mainThread": 713,
+        "bootup": 292,
+        "bytes": 322355
+      },
+      {
+        "run": 3,
+        "score": 90,
+        "fcp": 2707,
+        "lcp": 2942,
+        "tbt": 101,
+        "cls": 0.01870281822430243,
+        "si": 2707,
+        "tti": 3061,
+        "domSize": 499,
+        "mainThread": 717,
+        "bootup": 286,
+        "bytes": 322355
+      }
+    ],
+    "medianRunByTbt": "after-2.report.json",
+    "median": {
+      "score": 89,
+      "fcp": 2716.6208,
+      "lcp": 2946.1582,
+      "tbt": 102.99999999999955,
+      "cls": 0.01870281822430243,
+      "si": 2716.6208,
+      "tti": 3063.2582,
+      "domSize": 499,
+      "mainThread": 717.2800000000037,
+      "bootup": 292.1960000000026,
+      "bytes": 322355
+    }
+  },
+  "meta": {
+    "lighthouseVersion": "13.5.0",
+    "formFactor": "mobile",
+    "throttling": "simulate",
+    "warnings": []
+  }
+}

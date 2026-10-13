@@ -1,25 +1,12 @@
-import { createContext, useContext, type ReactNode } from 'react'
-import { FILTER_LABELS, type AssignmentFilter } from '../../types'
+import type { ReactNode } from 'react'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { FILTER_LABELS, isAssignmentFilter, type AssignmentFilter } from '@/types'
+import { formatCount } from './assignmentUtils'
 
 /**
- * Compound Component (Buổi 2) — cùng pattern Tabs trên slide:
- * FilterTabs + FilterTabs.List + FilterTabs.Tab chia sẻ state qua Context.
+ * Compound Component (Buổi 2): FilterTabs + FilterTabs.List + FilterTabs.Tab.
+ * Bản TH02 dựng trên Tabs của shadcn/ui (Radix) — state chọn tab và điều hướng bằng phím mũi tên do Radix lo.
  */
-interface FilterTabsContextValue {
-  value: AssignmentFilter
-  setValue: (next: AssignmentFilter) => void
-}
-
-const FilterTabsContext = createContext<FilterTabsContextValue | null>(null)
-
-function useFilterTabsContext() {
-  const ctx = useContext(FilterTabsContext)
-  if (!ctx) {
-    throw new Error('FilterTabs.* phải nằm trong <FilterTabs>')
-  }
-  return ctx
-}
-
 interface FilterTabsProps {
   value: AssignmentFilter
   onChange: (next: AssignmentFilter) => void
@@ -28,17 +15,22 @@ interface FilterTabsProps {
 
 function FilterTabs({ value, onChange, children }: FilterTabsProps) {
   return (
-    <FilterTabsContext.Provider value={{ value, setValue: onChange }}>
-      <div className="filter-tabs">{children}</div>
-    </FilterTabsContext.Provider>
+    <Tabs
+      value={value}
+      onValueChange={(next) => {
+        if (isAssignmentFilter(next)) onChange(next)
+      }}
+    >
+      {children}
+    </Tabs>
   )
 }
 
 function List({ children }: { children: ReactNode }) {
   return (
-    <div className="filter-tabs__list" role="tablist" aria-label="Lọc theo trạng thái">
+    <TabsList aria-label="Lọc theo trạng thái" className="w-full justify-start overflow-x-auto sm:w-fit">
       {children}
-    </div>
+    </TabsList>
   )
 }
 
@@ -49,20 +41,15 @@ interface TabProps {
 }
 
 function Tab({ value, count, children }: TabProps) {
-  const { value: active, setValue } = useFilterTabsContext()
-  const selected = active === value
-
   return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={selected}
-      className={selected ? 'filter-tabs__tab is-active' : 'filter-tabs__tab'}
-      onClick={() => setValue(value)}
-    >
-      <span>{children ?? FILTER_LABELS[value]}</span>
-      {typeof count === 'number' ? <em>{count}</em> : null}
-    </button>
+    <TabsTrigger value={value} className="flex-none px-2.5">
+      {children ?? FILTER_LABELS[value]}
+      {/* Khoảng trắng để tên truy cập là "Quá hạn 2", không dính thành "Quá hạn2". */}
+      {typeof count === 'number' ? ' ' : null}
+      {typeof count === 'number' ? (
+        <span className="rounded-full bg-muted-foreground/15 px-1.5 text-xs font-medium tabular-nums">{formatCount(count)}</span>
+      ) : null}
+    </TabsTrigger>
   )
 }
 

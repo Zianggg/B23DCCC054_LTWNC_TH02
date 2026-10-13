@@ -1,6 +1,7 @@
 /**
  * Buổi 1 — TypeScript nâng cao
  * Bộ type dùng chung: generic, utility types, mapped types, type guard.
+ * Logic nghiệp vụ (hạn nộp, lọc, thống kê) nằm ở features/assignments/assignmentUtils.ts.
  */
 
 /** Constraint cho generic thao tác theo id (slide findById<T extends HasId>). */
@@ -17,12 +18,13 @@ export type AsyncStatus = 'idle' | 'loading' | 'succeeded' | 'failed'
 export interface Assignment extends HasId {
   course: string
   title: string
+  /** Ngày dạng YYYY-MM-DD (giá trị của input type="date"). */
   dueDate: string
   priority: Priority
   completed: boolean
 }
 
-/** Form thêm bài: không gửi id và completed — server/store tự sinh. */
+/** Form thêm bài: không gửi id và completed — store tự sinh. */
 export type CreateAssignmentDto = Omit<Assignment, 'id' | 'completed'>
 
 /** Cập nhật từng phần: mọi field đều tuỳ chọn. */
@@ -80,54 +82,4 @@ export function isAssignmentFilter(value: string): value is AssignmentFilter {
 
 export function isOverdueDeadline(info: DeadlineInfo): info is Extract<DeadlineInfo, { kind: 'overdue' }> {
   return info.kind === 'overdue'
-}
-
-function startOfDay(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
-}
-
-export function getDeadlineInfo(dueDate: string, now: Date = new Date()): DeadlineInfo {
-  const due = startOfDay(new Date(dueDate))
-  const today = startOfDay(now)
-  const days = Math.round((due.getTime() - today.getTime()) / 86_400_000)
-  if (days < 0) {
-    return { kind: 'overdue', days: Math.abs(days) }
-  }
-  return { kind: 'remaining', days }
-}
-
-export function formatDeadlineLabel(info: DeadlineInfo): string {
-  if (isOverdueDeadline(info)) {
-    return `Quá hạn ${info.days} ngày`
-  }
-  return `Còn ${info.days} ngày`
-}
-
-export function isAssignmentOverdue(assignment: Assignment, now: Date = new Date()): boolean {
-  return !assignment.completed && getDeadlineInfo(assignment.dueDate, now).kind === 'overdue'
-}
-
-export function filterAssignments(
-  items: Assignment[],
-  filter: AssignmentFilter,
-  now: Date = new Date(),
-): Assignment[] {
-  switch (filter) {
-    case 'incomplete':
-      return items.filter((item) => !item.completed)
-    case 'completed':
-      return items.filter((item) => item.completed)
-    case 'overdue':
-      return items.filter((item) => isAssignmentOverdue(item, now))
-    default:
-      return items
-  }
-}
-
-/** Bài chưa xong có hạn nộp sớm nhất — dùng cho dòng cảnh báo đầu trang. */
-export function getNearestOpenAssignment(items: Assignment[]): Assignment | undefined {
-  return items
-    .filter((item) => !item.completed)
-    .slice()
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0]
 }
